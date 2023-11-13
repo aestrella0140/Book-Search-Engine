@@ -3,13 +3,13 @@ const { signToken, AuthenticationError } = require('../utils/auth');
 
 const resolvers = {
     Query: {
-        users: async () => {
-            return User.find();
-        },
+        // users: async () => {
+        //     return User.find();
+        // },
 
-        user: async (parent, { userId }) => {
-            return User.findOne({ _id: userId});
-        },
+        // user: async (parent, { userId }) => {
+        //     return User.findOne({ _id: userId});
+        // },
 
         // adding context to query, we can retrieve logged in user with without specifically searching for them
         me: async (parent, args, context) => {
@@ -24,6 +24,8 @@ const resolvers = {
         addUser: async (parent, { username, email, password }) => {
             const user = await User.create({ username, email, password });
             const token = signToken(user);
+
+            return { token, user };
         },
         login: async (parent, {email, password }) => {
             const user = await User.findOne({ email });
@@ -32,7 +34,7 @@ const resolvers = {
                 throw AuthenticationError;
             }
 
-            const correctPw = await user.isCorrecPassord(password);
+            const correctPw = await user.isCorrectPassword(password);
 
             if(!correctPw) {
                 throw AuthenticationError;
@@ -42,7 +44,7 @@ const resolvers = {
             return { token, user };
         },
 
-        addBook: async (parent, { userId, book }, context) => {
+        savedBooks: async (parent, { userId, book }, context) => {
             if (context.user) {
                 return User.findOneAndUpdate(
                     { _id: userId },
@@ -59,12 +61,12 @@ const resolvers = {
             throw AuthenticationError;
         },
 
-        removeUser: async (parent, args, context) => {
-            if (context.user) {
-                return User.findOneAndDelete({ _id: context.user._id });
-            }
-            throw AuthenticationError;
-        },
+        // removeUser: async (parent, args, context) => {
+        //     if (context.user) {
+        //         return User.findOneAndDelete({ _id: context.user._id });
+        //     }
+        //     throw AuthenticationError;
+        // },
 
         removeBook: async (parent, { book }, context) => {
             if (context.user) {
